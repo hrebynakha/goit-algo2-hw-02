@@ -1,3 +1,24 @@
+"""
+Оптимізація черги 3D-принтера в університетській лабораторії
+
+Розробіть програму для оптимізації черги завдань 3D-друку з урахуванням пріоритетів
+та технічних обмежень принтера, використовуючи жадібний алгоритм.
+
+Опис завдання
+
+1. Використовуйте вхідні дані у вигляді списку завдань на друк,
+де кожне завдання містить: ID, об'єм моделі, пріоритет та час друку.
+
+2. Реалізуйте основну функцію optimize_printing, яка буде:
+    Враховувати пріоритети завдань.
+    Групувати моделі для одночасного друку.
+    Перевіряти обмеження об'єму та кількості.
+    Розраховувати загальний час друку.
+    Повертати оптимальний порядок друку.
+3. Виведіть оптимальний порядок друку та загальний час виконання всіх завдань.
+
+"""
+
 from typing import List, Dict
 from dataclasses import dataclass
 
@@ -46,16 +67,20 @@ def optimize_printing(
     def is_item_full(queue) -> bool:
         return constraints.max_items <= len(queue)
 
+    def is_constraints_violated(job, queue) -> bool:
+        if is_volume_full(queue) or is_item_full(queue):
+            return True
+        if get_volume_size(queue) + job.volume > constraints.max_volume:
+            return True
+        return False
+
     print_order = []
     total_time = 0
     print_queue = []
     sorted_job = sorted(print_jobs, key=lambda x: x.priority)
 
     for job in sorted_job:
-        if is_volume_full(print_queue) or is_item_full(print_queue):
-            total_time += get_q_time(print_queue)
-            print_queue = []
-        if get_volume_size(print_queue) + job.volume > constraints.max_volume:
+        if is_constraints_violated(job, print_queue):
             total_time += get_q_time(print_queue)
             print_queue = []
 
