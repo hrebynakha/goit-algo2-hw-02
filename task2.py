@@ -44,10 +44,43 @@ def rod_cutting_memo(length: int, prices: List[int]) -> Dict:
     Returns:
         Dict з максимальним прибутком та списком розрізів
     """
+    if length < 0:
+        raise ValueError("Rod lenght value must be grater than 0")
+    if not prices:
+        raise ValueError("Prices array can't be empty")
+    if len(prices) != length:
+        raise ValueError("Lenght of prices must be equal to rod length")
+    for price in prices:
+        if price < 0:
+            raise ValueError("Price must be grate than 0")
+    memo = {}
+    cuts = {}
 
-    # Тут повинен бути ваш код
+    def calc_max(length: int) -> int:
+        if length == 0:
+            return 0
+        if length in memo:
+            return memo[length]
+        price_ = 0
+        for i in range(1, length + 1):
+            proposed_price = prices[i - 1] + calc_max(length - i)
+            if proposed_price > price_:
+                price_ = proposed_price
+                cuts[length] = i
 
-    return {"max_profit": None, "cuts": None, "number_of_cuts": None}
+        memo[i] = price_
+        return price_
+
+    max_profit = calc_max(length=length)
+
+    all_cuts = []
+    length_ = length
+    while length_ > 0:
+        cut = cuts[length_]
+        all_cuts.append(cut)
+        length_ -= cut
+
+    return {"max_profit": max_profit, "cuts": all_cuts, "number_of_cuts": len(all_cuts)}
 
 
 def rod_cutting_table(length: int, prices: List[int]) -> Dict:
@@ -61,20 +94,40 @@ def rod_cutting_table(length: int, prices: List[int]) -> Dict:
     Returns:
         Dict з максимальним прибутком та списком розрізів
     """
+    if length < 0:
+        raise ValueError("Rod lenght value must be grater than 0")
+    if not prices:
+        raise ValueError("Prices array can't be empty")
+    if len(prices) != length:
+        raise ValueError("Lenght of prices must be equal to rod length")
+    for price in prices:
+        if price < 0:
+            raise ValueError("Price must be grate than 0")
+    dp = [0] * (length + 1)
+    cuts = {}
+    for i in range(1, length + 1):
+        for j in range(1, i + 1):
+            if dp[i] < prices[j - 1] + dp[i - j]:
+                # rewrite value
+                dp[i] = prices[j - 1] + dp[i - j]
+                cuts[i] = j
 
-    # Тут повинен бути ваш код
+    max_profit = dp[length]
+    all_cuts = []
+    length_ = length
+    while length_ > 0:
+        cut = cuts[length_]
+        all_cuts.append(cut)
+        length_ -= cut
 
-    return {"max_profit": None, "cuts": None, "number_of_cuts": None}
+    return {"max_profit": max_profit, "cuts": all_cuts, "number_of_cuts": len(all_cuts)}
 
 
 def run_tests():
     """Функція для запуску всіх тестів"""
     test_cases = [
-        # Тест 1: Базовий випадок
         {"length": 5, "prices": [2, 5, 7, 8, 10], "name": "Базовий випадок"},
-        # Тест 2: Оптимально не різати
         {"length": 3, "prices": [1, 3, 8], "name": "Оптимально не різати"},
-        # Тест 3: Всі розрізи по 1
         {"length": 4, "prices": [3, 5, 6, 7], "name": "Рівномірні розрізи"},
     ]
 
